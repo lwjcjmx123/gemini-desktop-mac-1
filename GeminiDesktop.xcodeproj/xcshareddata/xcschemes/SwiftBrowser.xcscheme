@@ -45,8 +45,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "74CBD8A92EED8FCB00F226E3"
-            BuildableName = "Gemini Desktop.app"
-            BlueprintName = "GeminiDesktop"
+            BuildableName = "Swift Browser.app"
+            BlueprintName = "SwiftBrowser"
             ReferencedContainer = "container:GeminiDesktop.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -69,8 +69,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "74CBD8A92EED8FCB00F226E3"
-            BuildableName = "Gemini Desktop.app"
-            BlueprintName = "GeminiDesktop"
+            BuildableName = "Swift Browser.app"
+            BlueprintName = "SwiftBrowser"
             ReferencedContainer = "container:GeminiDesktop.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

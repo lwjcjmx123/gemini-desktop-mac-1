@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Gemini Desktop is an unofficial native macOS desktop wrapper for Google Gemini (`https://gemini.google.com/app`). It loads the official Gemini website inside a `WKWebView` to provide a desktop-class experience. No Electron, no Node.js — this is a pure Swift/Xcode project.
+Swift Browser is a lightweight native macOS browser built with Swift and WKWebView. It provides tabbed browsing, an address bar, proxy support, and system integration features like hot corner triggers and global keyboard shortcuts.
 
-- **Bundle ID:** `com.alexcding.geminidesktop`
+- **Bundle ID:** `com.swiftbrowser.browser`
 - **Minimum macOS:** 14.0 (Sonoma)
 - **Language:** Swift 5.0
 - **UI:** SwiftUI + AppKit interop
@@ -18,38 +18,48 @@ Gemini Desktop is an unofficial native macOS desktop wrapper for Google Gemini (
 # Open in Xcode and build with Cmd+R
 open GeminiDesktop.xcodeproj
 
-# Create DMG for distribution (expects built .app at ~/Downloads/GeminiDesktop/)
-./scripts/create-dmg.sh
+# Or use the build script
+./scripts/build.sh          # Build only
+./scripts/build.sh --open   # Build and open
+./scripts/build.sh --dmg    # Build and create DMG
 ```
 
-There are no tests in this project. The Xcode scheme has a TestAction but no test targets exist.
+There are no tests in this project.
 
 ## Architecture
 
-### Single Shared WKWebView
+### Tabbed Browsing
 
-The most important architectural decision: there is exactly **one** `WKWebView` instance, owned by `WebViewModel`. It is physically moved between the main window and the floating chat bar panel via `WebViewContainer.attachWebView()` (triggered by `NSWindow.didBecomeKeyNotification`). This avoids duplicate sessions/logins but means the WebView can only be in one view hierarchy at a time.
+Each tab is a `BrowserTab` instance that owns its own `WebViewModel` (which in turn owns a `WKWebView`). Tabs are managed by `TabManager`, which handles creation, closing, selection, and persistence to `UserDefaults`.
 
 ### Coordinator Pattern
 
 `AppCoordinator` is the central state hub. All views bind to it via `@Binding`. It manages:
-- Navigation (back/forward/home/reload) — delegated to `WebViewModel`
+- Navigation (back/forward/home/reload) — delegated to the selected tab's `WebViewModel`
 - Zoom level — persisted to `UserDefaults`
-- Chat bar visibility — owns the `ChatBarPanel` instance
+- Hot corner trigger — owns `HotCornerMonitor`, slides window in/out from bottom-left
+- Global keyboard shortcut — via KeyboardShortcuts library
 - Window lifecycle — finding, showing, hiding, and positioning windows
+- Tab management — delegated to `TabManager`
 
 ### SwiftUI + AppKit Hybrid
 
 The app uses SwiftUI for declarative scene definitions (`Window`, `Settings`, `MenuBarExtra`) but drops into AppKit for:
-- `ChatBarPanel` — an `NSPanel` subclass (floating, always-on-top, borderless, resizable)
-- `WebViewContainer` — an `NSView` subclass that hosts the shared `WKWebView` via `NSViewRepresentable`
-- Window management — finding windows by identifier, positioning on screens
+- `WebViewContainer` — an `NSView` subclass that hosts a `WKWebView` via `NSViewRepresentable`
+- Window management — finding windows by identifier, positioning on screens, slide animations
 
-### Three UI Surfaces
+### Two UI Surfaces
 
-1. **Main Window** (`MainWindowView`) — full desktop window with toolbar (back button + minimize-to-chat-bar button)
-2. **Chat Bar** (`ChatBarPanel` + `ChatBarView`) — floating `NSPanel` that auto-expands when a conversation is detected (polls via JS every 1s)
-3. **Menu Bar Extra** (`MenuBarView`) — system tray dropdown with Open/Toggle Chat Bar/Settings/Quit
+1. **Main Window** (`MainWindowView`) — full desktop window with sidebar (tabs), address bar, and toolbar (back/forward/new tab)
+2. **Menu Bar Extra** (`MenuBarView`) — system tray dropdown with Open/Settings/Quit
+
+### WebView Configuration (`WebViewFactory`)
+
+`WebViewFactory` creates configured `WKWebView` instances with:
+- Custom Safari user agent
+- User scripts (IME fix, console log bridge)
+- Optional SOCKS5/HTTP proxy via `ProxyHelper`
+- Saved zoom level from `UserDefaults`
 
 ### Injected JavaScript (`UserScripts`)
 
@@ -59,19 +69,21 @@ Two scripts are injected into the WebView:
 
 ### Key Patterns
 
-- **Constants** are defined as nested `Constants` structs within extensions of each type (e.g., `ChatBarPanel.Constants`, `GeminiWebView.Constants`)
+- **Constants** are defined as nested `Constants` structs within extensions of each type (e.g., `BrowserWebView.Constants`, `AppCoordinator.Constants`)
 - **UserDefaults keys** are centralized in `UserDefaultsKeys` enum (`Utils/UserDefaultsKeys.swift`)
-- **Screen utilities** (`NSScreen+Extensions.swift`) handle multi-monitor positioning — finding the screen at mouse location, centering windows, bottom-center positioning for the chat bar
-- **External URL detection** (`GeminiWebView.Coordinator.isExternalURL`) keeps `gemini.google.com`, `accounts.google.com`, `*.googleapis.com`, and `*.gstatic.com` in-app; everything else opens in the default browser
+- **Screen utilities** (`NSScreen+Extensions.swift`) handle multi-monitor positioning — finding the screen at mouse location, centering windows
+- **Hot corner** (`HotCornerMonitor`) uses CGEvent tap (works in fullscreen) with NSEvent fallback
+- **External links** with `target="_blank"` are loaded in the current tab (no new window creation)
 
 ## Directory Layout
 
 ```
-App/            — @main entry point (GeminiDesktopApp) and AppDelegate
+App/            — @main entry point (SwiftBrowserApp) and AppDelegate
 Coordinators/   — AppCoordinator (central state manager)
-ChatBar/        — ChatBarPanel (NSPanel) and ChatBarView (SwiftUI overlay)
-WebKit/         — WebViewModel, GeminiWebView (NSViewRepresentable), UserScripts
-Views/          — MainWindowView, MenuBarView, SettingsView
-Utils/          — UserDefaultsKeys, NSScreen extensions
-scripts/        — create-dmg.sh (DMG packaging)
+Models/         — BrowserTab (tab model), TabManager (tab collection + persistence)
+WebKit/         — WebViewModel, BrowserWebView (NSViewRepresentable), WebViewFactory, UserScripts
+Views/          — MainWindowView, SidebarView, AddressBarView, MenuBarView, SettingsView
+Utils/          — UserDefaultsKeys, NSScreen extensions, HotCornerMonitor, ProxyHelper, KeyboardShortcutNames
+Resources/      — App icon, entitlements, Info.plist
+scripts/        — build.sh (build + DMG), create-dmg.sh (DMG from DerivedData)
 ```

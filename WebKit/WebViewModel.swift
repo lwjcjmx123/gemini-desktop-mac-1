@@ -2,8 +2,6 @@
 //  WebViewModel.swift
 //  SwiftBrowser
 //
-//  Created by alexcding on 2025-12-15.
-//
 
 import WebKit
 import Combine

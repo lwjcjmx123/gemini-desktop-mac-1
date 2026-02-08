@@ -1,80 +1,64 @@
-# Gemini Desktop for macOS (Unofficial)
+# Swift Browser
 
-An **unofficial macOS desktop wrapper** for Google Gemini, built as a lightweight desktop app that loads the official Gemini website.
-
-![Desktop](docs/desktop.png)
-
-![Chat Bar](docs/chat_bar.png)
-
-> **Disclaimer:**
-> This project is **not affiliated with, endorsed by, or sponsored by Google**.
-> "Gemini" is a trademark of **Google LLC**.
-> This app does not modify, scrape, or redistribute Gemini content — it simply loads the official website.
-
----
+A lightweight, native macOS browser built with Swift and WKWebView. No Electron, no Node.js — just a fast, minimal browsing experience.
 
 ## Features
 
-### Floating Chat Bar
-- **Quick Access Panel** - A floating window that stays on top of all apps
-
-### Global Keyboard Shortcut
-- **Toggle Chat Bar** - Set your own shortcut in Settings to instantly show/hide the chat bar from any app
-- Configurable via visual keyboard recorder in preferences
-
-### Other Features
-- Native macOS desktop experience
-- Lightweight WebView wrapper
-- Adjustable text size (80%-120%)
-- Camera & microphone support for Gemini features
-- Uses the official Gemini web interface
-- No tracking, no data collection
-- Open source
-
----
-
-## What This App Is (and Isn't)
-
-**This app is:**
-- A thin desktop wrapper around `https://gemini.google.com`
-- A convenience app for macOS users
-
-**This app is NOT:**
-- An official Gemini client
-- A replacement for Google's website
-- A modified or enhanced version of Gemini
-- A Google-authored product
-
-All functionality is provided entirely by the Gemini web app itself.
-
----
-
-## Login & Security Notes
-
-- Authentication is handled by Google on their website
-- This app does **not** intercept credentials
-- No user data is stored or transmitted by this app
-
-> Note: Google may restrict or change login behavior for embedded browsers at any time.
-
----
+- **Tabbed Browsing** — Multiple tabs with a sidebar, tab persistence across restarts
+- **Address Bar** — Enter URLs, domain names, or search queries (Google Search)
+- **Global Keyboard Shortcut** — Configurable shortcut to toggle the browser window from any app
+- **Hot Corner Trigger** — Show/hide the browser by moving the mouse to the bottom-left corner (works in fullscreen)
+- **Menu Bar Extra** — Quick access from the system tray
+- **SOCKS5 / HTTP Proxy** — Built-in proxy support via macOS Network framework
+- **IME Support** — Fixes double-Enter issue for CJK input methods
+- **File Downloads** — Download files directly to your Downloads folder
+- **Adjustable Text Size** — Zoom from 60% to 140%
+- **Launch at Login** — Optional auto-start with macOS
+- **Hide Dock Icon** — Run as a menu bar-only app
+- **Privacy** — No tracking, no data collection. Reset all website data with one click.
 
 ## System Requirements
 
 - **macOS 14.0 (Sonoma)** or later
 
----
+## Build from Source
 
-## Installation
-
-### Download
-- Grab the latest release from the **Releases** page
-  *(or build from source below)*
-
-### Build from Source
 ```bash
-git clone https://github.com/alexcding/gemini-desktop-mac.git
-cd gemini-desktop-mac
-open GeminiMac.xcodeproj
-# Build and run in Xcode
+git clone <repo-url>
+cd swift-browser
+open GeminiDesktop.xcodeproj
+# Build and run with Cmd+R in Xcode
 ```
+
+Or use the build script:
+
+```bash
+./scripts/build.sh          # Build only
+./scripts/build.sh --open   # Build and open
+./scripts/build.sh --dmg    # Build and create DMG
+./scripts/build.sh --release # Release configuration
+```
+
+## Architecture
+
+- **Language:** Swift 5.0
+- **UI:** SwiftUI + AppKit interop
+- **Web Engine:** WKWebView
+- **Dependency:** [KeyboardShortcuts](https://github.com/sindresorhus/KeyboardShortcuts) (via SPM)
+
+### Project Structure
+
+```
+App/            — Entry point (SwiftBrowserApp) and AppDelegate
+Coordinators/   — AppCoordinator (central state manager)
+Models/         — BrowserTab, TabManager
+WebKit/         — WebViewModel, BrowserWebView, WebViewFactory, UserScripts
+Views/          — MainWindowView, SidebarView, AddressBarView, MenuBarView, SettingsView
+Utils/          — UserDefaultsKeys, NSScreen extensions, HotCornerMonitor, ProxyHelper, KeyboardShortcutNames
+Resources/      — App icon, entitlements, Info.plist
+scripts/        — Build and DMG packaging scripts
+```
+
+## License
+
+[MIT](LICENSE)

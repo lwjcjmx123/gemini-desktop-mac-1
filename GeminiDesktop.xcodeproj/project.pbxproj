@@ -33,7 +33,6 @@
 		749D25F22EEE2C330054BA29 /* Exceptions for "Resources" folder in "SwiftBrowser" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				AppIcon.icon,
 				Assets.xcassets,
 			);
 			target = 74CBD8A92EED8FCB00F226E3 /* SwiftBrowser */;
@@ -60,7 +59,7 @@
 		749D25D32EEE2C330054BA29 /* App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				749D25F02EEE2C330054BA29 /* Exceptions for "App" folder in "GeminiDesktop" target */,
+				749D25F02EEE2C330054BA29 /* Exceptions for "App" folder in "SwiftBrowser" target */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -68,7 +67,7 @@
 		749D25D52EEE2C330054BA29 /* Coordinators */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				749D25F12EEE2C330054BA29 /* Exceptions for "Coordinators" folder in "GeminiDesktop" target */,
+				749D25F12EEE2C330054BA29 /* Exceptions for "Coordinators" folder in "SwiftBrowser" target */,
 			);
 			path = Coordinators;
 			sourceTree = "<group>";
@@ -76,7 +75,7 @@
 		749D25DA2EEE2C330054BA29 /* Resources */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				749D25F22EEE2C330054BA29 /* Exceptions for "Resources" folder in "GeminiDesktop" target */,
+				749D25F22EEE2C330054BA29 /* Exceptions for "Resources" folder in "SwiftBrowser" target */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -84,7 +83,7 @@
 		749D25DC2EEE2C330054BA29 /* Utils */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				749D25F32EEE2C330054BA29 /* Exceptions for "Utils" folder in "GeminiDesktop" target */,
+				749D25F32EEE2C330054BA29 /* Exceptions for "Utils" folder in "SwiftBrowser" target */,
 			);
 			path = Utils;
 			sourceTree = "<group>";

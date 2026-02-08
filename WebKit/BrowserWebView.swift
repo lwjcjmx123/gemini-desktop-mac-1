@@ -2,8 +2,6 @@
 //  BrowserWebView.swift
 //  SwiftBrowser
 //
-//  Created by alexcding on 2025-12-13.
-//
 
 import SwiftUI
 import WebKit
