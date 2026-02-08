@@ -1,16 +1,24 @@
 //
 //  UserDefaultsKeys.swift
-//  GeminiDesktop
-//
-//  Created by alexcding on 2025-12-13.
+//  SwiftBrowser
 //
 
 import Foundation
 
 enum UserDefaultsKeys: String {
-    case panelWidth
-    case panelHeight
     case pageZoom
     case hideWindowAtLaunch
     case hideDockIcon
+    // Proxy
+    case proxyEnabled
+    case proxyHost
+    case proxyPort
+    // Hot Corner
+    case hotCornerEnabled
+    case hotCornerWindowX
+    case hotCornerWindowY
+    case hotCornerWindowSaved
+    // Tab Persistence
+    case savedTabs
+    case savedSelectedTabIndex
 }

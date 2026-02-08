@@ -1,8 +1,6 @@
 //
 //  UserScripts.swift
-//  GeminiDesktop
-//
-//  Created by alexcding on 2025-12-15.
+//  SwiftBrowser
 //
 
 import WebKit
@@ -66,11 +64,10 @@ enum UserScripts {
     })();
     """
 
-    /// JavaScript to fix IME double-enter issue on Gemini
+    /// JavaScript to fix IME double-enter issue
     /// When using IME (e.g., Chinese/Japanese input), pressing Enter after completing
     /// composition would require a second Enter to send. This script detects when
     /// IME composition just ended and automatically clicks the send button.
-    /// https://update.greasyfork.org/scripts/532717/阻止Gemini两次点击.user.js
     private static let imeFixSource = """
     (function() {
         'use strict';

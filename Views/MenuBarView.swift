@@ -1,6 +1,6 @@
 //
 //  MenuBarContentView.swift
-//  GeminiDesktop
+//  SwiftBrowser
 //
 //  Created by alexcding on 2025-12-13.
 //
@@ -17,13 +17,7 @@ struct MenuBarView: View {
             Button {
                 coordinator.openMainWindow()
             } label: {
-                Label("Open Gemini Desktop", systemImage: "macwindow")
-            }
-
-            Button {
-                coordinator.toggleChatBar()
-            } label: {
-                Label("Toggle Chat Bar", systemImage: "rectangle.bottomhalf.inset.filled")
+                Label("Open Swift Browser", systemImage: "macwindow")
             }
 
             Divider()

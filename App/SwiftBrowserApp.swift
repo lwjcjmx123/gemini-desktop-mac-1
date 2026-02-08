@@ -1,23 +1,16 @@
 //
-//  GeminiDesktopApp.swift
-//  GeminiDesktop
+//  SwiftBrowserApp.swift
+//  SwiftBrowser
 //
 //  Created by alexcding on 2025-12-13.
 //
 
 import SwiftUI
-import KeyboardShortcuts
 import AppKit
-import Combine
-
-// MARK: - Keyboard Shortcut Definition
-extension KeyboardShortcuts.Name {
-    static let bringToFront = Self("bringToFront", default: nil)
-}
 
 // MARK: - Main App
 @main
-struct GeminiDesktopApp: App {
+struct SwiftBrowserApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @State var coordinator = AppCoordinator()
     @Environment(\.openWindow) private var openWindow
@@ -86,6 +79,22 @@ struct GeminiDesktopApp: App {
                     Label("Actual Size", systemImage: "1.magnifyingglass")
                 }
                 .keyboardShortcut("0", modifiers: .command)
+
+                Divider()
+
+                Button {
+                    coordinator.newTab()
+                } label: {
+                    Label("New Tab", systemImage: "plus.square")
+                }
+                .keyboardShortcut("t", modifiers: .command)
+
+                Button {
+                    coordinator.closeCurrentTab()
+                } label: {
+                    Label("Close Tab", systemImage: "xmark.square")
+                }
+                .keyboardShortcut("w", modifiers: .command)
             }
         }
 
@@ -120,16 +129,10 @@ struct GeminiDesktopApp: App {
         }
         .menuBarExtraStyle(.menu)
     }
-
-    init() {
-        KeyboardShortcuts.onKeyDown(for: .bringToFront) { [self] in
-            coordinator.toggleChatBar()
-        }
-    }
 }
 
 // MARK: - Constants
-extension GeminiDesktopApp {
+extension SwiftBrowserApp {
     struct Constants {
         // Main Window
         static let mainWindowMinWidth: CGFloat = 400

@@ -1,6 +1,6 @@
 //
 //  WebViewModel.swift
-//  GeminiDesktop
+//  SwiftBrowser
 //
 //  Created by alexcding on 2025-12-15.
 //
@@ -17,18 +17,14 @@ class ConsoleLogHandler: NSObject, WKScriptMessageHandler {
     }
 }
 
-/// Observable wrapper around WKWebView with Gemini-specific functionality
+/// Observable wrapper around WKWebView supporting arbitrary URLs
 @Observable
 class WebViewModel {
 
     // MARK: - Constants
 
-    static let geminiURL = URL(string: "https://gemini.google.com/app")!
+    static let defaultHomeURL = URL(string: "https://gemini.google.com/app")!
     static let defaultPageZoom: Double = 1.0
-
-    private static let geminiHost = "gemini.google.com"
-    private static let geminiAppPath = "/app"
-    private static let userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15"
     private static let minZoom: Double = 0.6
     private static let maxZoom: Double = 1.4
 
@@ -37,43 +33,53 @@ class WebViewModel {
     let wkWebView: WKWebView
     private(set) var canGoBack: Bool = false
     private(set) var canGoForward: Bool = false
-    private(set) var isAtHome: Bool = true
+    private(set) var currentURL: String = ""
+    private(set) var pageTitle: String = "New Tab"
+    private(set) var isLoading: Bool = false
 
     // MARK: - Private Properties
 
     private var backObserver: NSKeyValueObservation?
     private var forwardObserver: NSKeyValueObservation?
     private var urlObserver: NSKeyValueObservation?
-    private let consoleLogHandler = ConsoleLogHandler()
+    private var titleObserver: NSKeyValueObservation?
+    private var loadingObserver: NSKeyValueObservation?
 
     // MARK: - Initialization
 
-    init() {
-        self.wkWebView = Self.createWebView(consoleLogHandler: consoleLogHandler)
+    init(initialURL: URL? = nil, configuration: WKWebViewConfiguration? = nil) {
+        self.wkWebView = WebViewFactory.makeWebView(configuration: configuration)
         setupObservers()
-        loadHome()
+        if let url = initialURL {
+            wkWebView.load(URLRequest(url: url))
+        }
     }
 
     // MARK: - Navigation
 
     func loadHome() {
-        isAtHome = true
-        canGoBack = false
-        wkWebView.load(URLRequest(url: Self.geminiURL))
+        wkWebView.load(URLRequest(url: Self.defaultHomeURL))
     }
 
-    func goBack() {
-        isAtHome = false
-        wkWebView.goBack()
+    /// Smart URL loading: detects URLs, domains, and search queries
+    func loadURL(_ input: String) {
+        let trimmed = input.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+
+        if let url = asURL(trimmed) {
+            wkWebView.load(URLRequest(url: url))
+        } else {
+            // Treat as search query
+            let query = trimmed.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? trimmed
+            if let searchURL = URL(string: "https://www.google.com/search?q=\(query)&hl=en&gl=US") {
+                wkWebView.load(URLRequest(url: searchURL))
+            }
+        }
     }
 
-    func goForward() {
-        wkWebView.goForward()
-    }
-
-    func reload() {
-        wkWebView.reload()
-    }
+    func goBack() { wkWebView.goBack() }
+    func goForward() { wkWebView.goForward() }
+    func reload() { wkWebView.reload() }
 
     // MARK: - Zoom
 
@@ -96,65 +102,49 @@ class WebViewModel {
         UserDefaults.standard.set(zoom, forKey: UserDefaultsKeys.pageZoom.rawValue)
     }
 
-    // MARK: - Private Setup
+    // MARK: - Private
 
-    private static func createWebView(consoleLogHandler: ConsoleLogHandler) -> WKWebView {
-        let configuration = WKWebViewConfiguration()
-        configuration.websiteDataStore = .default()
-        configuration.defaultWebpagePreferences.allowsContentJavaScript = true
-        configuration.mediaTypesRequiringUserActionForPlayback = []
-
-        // Add user scripts
-        for script in UserScripts.createAllScripts() {
-            configuration.userContentController.addUserScript(script)
+    private func asURL(_ input: String) -> URL? {
+        // Already has scheme
+        if input.hasPrefix("http://") || input.hasPrefix("https://") {
+            return URL(string: input)
         }
-
-        // Register console log message handler (debug only)
-        #if DEBUG
-        configuration.userContentController.add(consoleLogHandler, name: UserScripts.consoleLogHandler)
-        #endif
-
-        let webView = WKWebView(frame: .zero, configuration: configuration)
-        webView.allowsBackForwardNavigationGestures = true
-        webView.allowsLinkPreview = true
-        webView.customUserAgent = userAgent
-
-        let savedZoom = UserDefaults.standard.double(forKey: UserDefaultsKeys.pageZoom.rawValue)
-        webView.pageZoom = savedZoom > 0 ? savedZoom : defaultPageZoom
-
-        return webView
+        // Looks like a domain (contains dot, no spaces)
+        if input.contains(".") && !input.contains(" ") {
+            return URL(string: "https://\(input)")
+        }
+        return nil
     }
 
     private func setupObservers() {
         backObserver = wkWebView.observe(\.canGoBack, options: [.new, .initial]) { [weak self] webView, _ in
             DispatchQueue.main.async {
-                guard let self = self else { return }
-                self.canGoBack = !self.isAtHome && webView.canGoBack
+                self?.canGoBack = webView.canGoBack
             }
         }
 
         forwardObserver = wkWebView.observe(\.canGoForward, options: [.new, .initial]) { [weak self] webView, _ in
             DispatchQueue.main.async {
-                guard let self = self else { return }
-                self.canGoForward = webView.canGoForward
+                self?.canGoForward = webView.canGoForward
             }
         }
 
-        urlObserver = wkWebView.observe(\.url, options: .new) { [weak self] webView, _ in
+        urlObserver = wkWebView.observe(\.url, options: [.new, .initial]) { [weak self] webView, _ in
             DispatchQueue.main.async {
-                guard let self = self else { return }
-                guard let currentURL = webView.url else { return }
+                self?.currentURL = webView.url?.absoluteString ?? ""
+            }
+        }
 
-                let isGeminiApp = currentURL.host == Self.geminiHost &&
-                                  currentURL.path.hasPrefix(Self.geminiAppPath)
+        titleObserver = wkWebView.observe(\.title, options: [.new, .initial]) { [weak self] webView, _ in
+            DispatchQueue.main.async {
+                let title = webView.title ?? ""
+                self?.pageTitle = title.isEmpty ? "New Tab" : title
+            }
+        }
 
-                if isGeminiApp {
-                    self.isAtHome = true
-                    self.canGoBack = false
-                } else {
-                    self.isAtHome = false
-                    self.canGoBack = webView.canGoBack
-                }
+        loadingObserver = wkWebView.observe(\.isLoading, options: [.new, .initial]) { [weak self] webView, _ in
+            DispatchQueue.main.async {
+                self?.isLoading = webView.isLoading
             }
         }
     }

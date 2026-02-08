@@ -1,13 +1,20 @@
 import SwiftUI
-import KeyboardShortcuts
 import WebKit
 import ServiceManagement
+import KeyboardShortcuts
 
 struct SettingsView: View {
     @Binding var coordinator: AppCoordinator
     @AppStorage(UserDefaultsKeys.pageZoom.rawValue) private var pageZoom: Double = Constants.defaultPageZoom
     @AppStorage(UserDefaultsKeys.hideWindowAtLaunch.rawValue) private var hideWindowAtLaunch: Bool = false
     @AppStorage(UserDefaultsKeys.hideDockIcon.rawValue) private var hideDockIcon: Bool = false
+    @AppStorage(UserDefaultsKeys.hotCornerEnabled.rawValue) private var hotCornerEnabled: Bool = false
+
+    // Proxy settings
+    @AppStorage(UserDefaultsKeys.proxyEnabled.rawValue) private var proxyEnabled: Bool = false
+    @AppStorage(UserDefaultsKeys.proxyHost.rawValue) private var proxyHost: String = "127.0.0.1"
+    @AppStorage(UserDefaultsKeys.proxyPort.rawValue) private var proxyPort: Int = 7890
+    @State private var showProxyRestartHint = false
 
     @State private var showingResetAlert = false
     @State private var isClearing = false
@@ -27,14 +34,17 @@ struct SettingsView: View {
                     .onChange(of: hideDockIcon) { _, newValue in
                         NSApp.setActivationPolicy(newValue ? .accessory : .regular)
                     }
-            }
-            Section("Keyboard Shortcuts") {
+                Toggle("Hot Corner Trigger (Bottom-Left)", isOn: $hotCornerEnabled)
+                    .onChange(of: hotCornerEnabled) { _, newValue in
+                        coordinator.updateHotCornerEnabled(newValue)
+                    }
                 HStack {
-                    Text("Toggle Chat Bar:")
+                    Text("Toggle Window Shortcut")
                     Spacer()
-                    KeyboardShortcuts.Recorder(for: .bringToFront)
+                    KeyboardShortcuts.Recorder(for: .toggleWindow)
                 }
             }
+
             Section("Appearance") {
                 HStack {
                     Text("Text Size: \(Int((pageZoom * 100).rounded()))%")
@@ -43,10 +53,40 @@ struct SettingsView: View {
                             value: $pageZoom,
                             in: Constants.minPageZoom...Constants.maxPageZoom,
                             step: Constants.pageZoomStep)
-                        .onChange(of: pageZoom) { coordinator.webViewModel.wkWebView.pageZoom = $1 }
+                        .onChange(of: pageZoom) { _, newValue in
+                            coordinator.tabManager.selectedTab?.webViewModel.wkWebView.pageZoom = newValue
+                        }
                         .labelsHidden()
                 }
             }
+
+            Section("Network") {
+                Toggle("Enable SOCKS5 Proxy", isOn: $proxyEnabled)
+                    .onChange(of: proxyEnabled) { _, _ in showProxyRestartHint = true }
+
+                if proxyEnabled {
+                    HStack {
+                        Text("Host:")
+                        TextField("127.0.0.1", text: $proxyHost)
+                            .textFieldStyle(.roundedBorder)
+                            .onChange(of: proxyHost) { _, _ in showProxyRestartHint = true }
+                    }
+                    HStack {
+                        Text("Port:")
+                        TextField("1080", value: $proxyPort, format: .number)
+                            .textFieldStyle(.roundedBorder)
+                            .frame(width: 80)
+                            .onChange(of: proxyPort) { _, _ in showProxyRestartHint = true }
+                    }
+                }
+
+                if showProxyRestartHint {
+                    Text("Proxy settings saved. Restart the app to apply changes.")
+                        .font(.caption)
+                        .foregroundStyle(.orange)
+                }
+            }
+
             Section("Privacy") {
                 HStack {
                     VStack(alignment: .leading) {
@@ -66,7 +106,7 @@ struct SettingsView: View {
             Button("Cancel", role: .cancel) { }
             Button("Reset", role: .destructive) { clearWebsiteData() }
         } message: {
-            Text("This will clear all cookies, cache, and login sessions. You will need to sign in to Gemini again.")
+            Text("This will clear all cookies, cache, and login sessions. You will need to sign in again.")
         }
     }
 

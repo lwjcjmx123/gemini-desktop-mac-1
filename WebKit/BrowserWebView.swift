@@ -1,6 +1,6 @@
 //
-//  GeminiWebView.swift
-//  GeminiDesktop
+//  BrowserWebView.swift
+//  SwiftBrowser
 //
 //  Created by alexcding on 2025-12-13.
 //
@@ -8,7 +8,7 @@
 import SwiftUI
 import WebKit
 
-struct GeminiWebView: NSViewRepresentable {
+struct BrowserWebView: NSViewRepresentable {
     let webView: WKWebView
 
     func makeNSView(context: Context) -> WebViewContainer {
@@ -26,12 +26,9 @@ struct GeminiWebView: NSViewRepresentable {
         private var downloadDestination: URL?
 
         func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
+            // Load target="_blank" links in the current tab
             if let url = navigationAction.request.url {
-                if isExternalURL(url) {
-                    NSWorkspace.shared.open(url)
-                } else {
-                    webView.load(URLRequest(url: url))
-                }
+                webView.load(URLRequest(url: url))
             }
             return nil
         }
@@ -109,7 +106,7 @@ struct GeminiWebView: NSViewRepresentable {
             alert.addButton(withTitle: "OK")
             alert.addButton(withTitle: "Cancel")
 
-            let textField = NSTextField(frame: NSRect(x: 0, y: 0, width: GeminiWebView.Constants.textFieldWidth, height: GeminiWebView.Constants.textFieldHeight))
+            let textField = NSTextField(frame: NSRect(x: 0, y: 0, width: BrowserWebView.Constants.textFieldWidth, height: BrowserWebView.Constants.textFieldHeight))
             textField.stringValue = defaultText ?? ""
             alert.accessoryView = textField
 
@@ -117,7 +114,7 @@ struct GeminiWebView: NSViewRepresentable {
         }
 
         func webView(_ webView: WKWebView, requestMediaCapturePermissionFor origin: WKSecurityOrigin, initiatedByFrame frame: WKFrameInfo, type: WKMediaCaptureType, decisionHandler: @escaping (WKPermissionDecision) -> Void) {
-            decisionHandler(origin.host.contains(GeminiWebView.Constants.trustedHost) ? .grant : .prompt)
+            decisionHandler(.prompt)
         }
 
         func webView(_ webView: WKWebView, runOpenPanelWith parameters: WKOpenPanelParameters, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping ([URL]?) -> Void) {
@@ -129,63 +126,27 @@ struct GeminiWebView: NSViewRepresentable {
                 completionHandler(response == .OK ? panel.urls : nil)
             }
         }
-
-        private func isExternalURL(_ url: URL) -> Bool {
-            guard let host = url.host?.lowercased() else { return false }
-            // Only Gemini-related domains stay in the app
-            let internalHosts = ["gemini.google.com", "accounts.google.com"]
-            let internalSuffixes = [".googleapis.com", ".gstatic.com"]
-
-            if internalHosts.contains(host) { return false }
-            for suffix in internalSuffixes {
-                if host.hasSuffix(suffix) { return false }
-            }
-            return true
-        }
     }
 }
 
 class WebViewContainer: NSView {
     let webView: WKWebView
-    let coordinator: GeminiWebView.Coordinator
-    private var windowObserver: NSObjectProtocol?
+    let coordinator: BrowserWebView.Coordinator
 
-    init(webView: WKWebView, coordinator: GeminiWebView.Coordinator) {
+    init(webView: WKWebView, coordinator: BrowserWebView.Coordinator) {
         self.webView = webView
         self.coordinator = coordinator
         super.init(frame: .zero)
         autoresizesSubviews = true
-        setupWindowObserver()
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
-    deinit {
-        if let observer = windowObserver {
-            NotificationCenter.default.removeObserver(observer)
-        }
-    }
-
-    private func setupWindowObserver() {
-        // Observe when ANY window becomes key - then check if we should have the webView
-        windowObserver = NotificationCenter.default.addObserver(
-            forName: NSWindow.didBecomeKeyNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] notification in
-            guard let self = self,
-                  let keyWindow = notification.object as? NSWindow,
-                  self.window === keyWindow else { return }
-            // Our window became key, attach webView
-            self.attachWebView()
-        }
-    }
-
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
-        if window != nil && window?.isKeyWindow == true {
+        if window != nil {
             attachWebView()
         }
     }
@@ -209,12 +170,11 @@ class WebViewContainer: NSView {
 }
 
 
-extension GeminiWebView {
+extension BrowserWebView {
 
     struct Constants {
         static let textFieldWidth: CGFloat = 200
         static let textFieldHeight: CGFloat = 24
-        static let trustedHost = "google.com"
     }
 
 }

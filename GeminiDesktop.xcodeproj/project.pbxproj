@@ -11,48 +11,43 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		74CBD8AA2EED8FCB00F226E3 /* Gemini Desktop.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Gemini Desktop.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		74CBD8AA2EED8FCB00F226E3 /* Swift Browser.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Swift Browser.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		749D25F02EEE2C330054BA29 /* Exceptions for "App" folder in "GeminiDesktop" target */ = {
+		749D25F02EEE2C330054BA29 /* Exceptions for "App" folder in "SwiftBrowser" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				AppDelegate.swift,
-				GeminiDesktopApp.swift,
+				SwiftBrowserApp.swift,
 			);
-			target = 74CBD8A92EED8FCB00F226E3 /* GeminiDesktop */;
+			target = 74CBD8A92EED8FCB00F226E3 /* SwiftBrowser */;
 		};
-		749D25F12EEE2C330054BA29 /* Exceptions for "Coordinators" folder in "GeminiDesktop" target */ = {
+		749D25F12EEE2C330054BA29 /* Exceptions for "Coordinators" folder in "SwiftBrowser" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				AppCoordinator.swift,
 			);
-			target = 74CBD8A92EED8FCB00F226E3 /* GeminiDesktop */;
+			target = 74CBD8A92EED8FCB00F226E3 /* SwiftBrowser */;
 		};
-		749D25F22EEE2C330054BA29 /* Exceptions for "Resources" folder in "GeminiDesktop" target */ = {
+		749D25F22EEE2C330054BA29 /* Exceptions for "Resources" folder in "SwiftBrowser" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				AppIcon.icon,
 				Assets.xcassets,
 			);
-			target = 74CBD8A92EED8FCB00F226E3 /* GeminiDesktop */;
+			target = 74CBD8A92EED8FCB00F226E3 /* SwiftBrowser */;
 		};
-		749D25F32EEE2C330054BA29 /* Exceptions for "Utils" folder in "GeminiDesktop" target */ = {
+		749D25F32EEE2C330054BA29 /* Exceptions for "Utils" folder in "SwiftBrowser" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				HotCornerMonitor.swift,
+				KeyboardShortcutNames.swift,
 				"NSScreen+Extensions.swift",
+				ProxyHelper.swift,
 				UserDefaultsKeys.swift,
 			);
-			target = 74CBD8A92EED8FCB00F226E3 /* GeminiDesktop */;
-		};
-		749D26102EEE2E930054BA29 /* Exceptions for "ChatBar" folder in "GeminiDesktop" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				ChatBarPanel.swift,
-				ChatBarView.swift,
-			);
-			target = 74CBD8A92EED8FCB00F226E3 /* GeminiDesktop */;
+			target = 74CBD8A92EED8FCB00F226E3 /* SwiftBrowser */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -99,12 +94,9 @@
 			path = Views;
 			sourceTree = "<group>";
 		};
-		749D25E32EEE2C330054BA29 /* ChatBar */ = {
+		74CBD8D02EED900100F226E3 /* Models */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				749D26102EEE2E930054BA29 /* Exceptions for "ChatBar" folder in "GeminiDesktop" target */,
-			);
-			path = ChatBar;
+			path = Models;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -126,7 +118,7 @@
 			children = (
 				749D25D32EEE2C330054BA29 /* App */,
 				749D25D52EEE2C330054BA29 /* Coordinators */,
-				749D25E32EEE2C330054BA29 /* ChatBar */,
+				74CBD8D02EED900100F226E3 /* Models */,
 				7452D4CF2EF08E5D00EDD8A4 /* WebKit */,
 				749D25E12EEE2C330054BA29 /* Views */,
 				749D25DC2EEE2C330054BA29 /* Utils */,
@@ -138,7 +130,7 @@
 		74CBD8AB2EED8FCB00F226E3 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				74CBD8AA2EED8FCB00F226E3 /* Gemini Desktop.app */,
+				74CBD8AA2EED8FCB00F226E3 /* Swift Browser.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -146,9 +138,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		74CBD8A92EED8FCB00F226E3 /* GeminiDesktop */ = {
+		74CBD8A92EED8FCB00F226E3 /* SwiftBrowser */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 74CBD8B52EED8FCB00F226E3 /* Build configuration list for PBXNativeTarget "GeminiDesktop" */;
+			buildConfigurationList = 74CBD8B52EED8FCB00F226E3 /* Build configuration list for PBXNativeTarget "SwiftBrowser" */;
 			buildPhases = (
 				74CBD8A62EED8FCB00F226E3 /* Sources */,
 				74CBD8A72EED8FCB00F226E3 /* Frameworks */,
@@ -160,14 +152,15 @@
 			);
 			fileSystemSynchronizedGroups = (
 				7452D4CF2EF08E5D00EDD8A4 /* WebKit */,
+				74CBD8D02EED900100F226E3 /* Models */,
 				749D25E12EEE2C330054BA29 /* Views */,
 			);
-			name = GeminiDesktop;
+			name = SwiftBrowser;
 			packageProductDependencies = (
 				74CBD8BF2EED900000F226E3 /* KeyboardShortcuts */,
 			);
-			productName = GeminiDesktop;
-			productReference = 74CBD8AA2EED8FCB00F226E3 /* Gemini Desktop.app */;
+			productName = SwiftBrowser;
+			productReference = 74CBD8AA2EED8FCB00F226E3 /* Swift Browser.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -185,7 +178,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 74CBD8A52EED8FCA00F226E3 /* Build configuration list for PBXProject "GeminiDesktop" */;
+			buildConfigurationList = 74CBD8A52EED8FCA00F226E3 /* Build configuration list for PBXProject "SwiftBrowser" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -202,7 +195,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				74CBD8A92EED8FCB00F226E3 /* GeminiDesktop */,
+				74CBD8A92EED8FCB00F226E3 /* SwiftBrowser */,
 			);
 		};
 /* End PBXProject section */
@@ -355,7 +348,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = Resources/GeminiDesktop.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Resources/SwiftBrowser.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Manual;
@@ -363,7 +356,7 @@
 				CURRENT_PROJECT_VERSION = 4;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = "";
-				ENABLE_APP_SANDBOX = YES;
+				ENABLE_APP_SANDBOX = NO;
 				ENABLE_FILE_ACCESS_DOWNLOADS_FOLDER = readwrite;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_INCOMING_NETWORK_CONNECTIONS = NO;
@@ -382,17 +375,17 @@
 				INFOPLIST_FILE = Resources/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_LSUIElement = YES;
-				INFOPLIST_KEY_NSCameraUsageDescription = "Gemini may need camera access for video calls or image capture.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "This app may need camera access for video calls or image capture.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Gemini may need microphone access for voice input.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "This app may need microphone access for voice input.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 0.1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.alexcding.geminidesktop;
-				PRODUCT_NAME = "Gemini Desktop";
+				PRODUCT_BUNDLE_IDENTIFIER = com.swiftbrowser.browser;
+				PRODUCT_NAME = "Swift Browser";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				REGISTER_APP_GROUPS = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -406,7 +399,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = Resources/GeminiDesktop.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Resources/SwiftBrowser.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application";
 				CODE_SIGN_STYLE = Manual;
@@ -415,7 +408,7 @@
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=macosx*]" = 8Z3UH5979Z;
-				ENABLE_APP_SANDBOX = YES;
+				ENABLE_APP_SANDBOX = NO;
 				ENABLE_FILE_ACCESS_DOWNLOADS_FOLDER = readwrite;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_INCOMING_NETWORK_CONNECTIONS = NO;
@@ -434,19 +427,19 @@
 				INFOPLIST_FILE = Resources/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_LSUIElement = YES;
-				INFOPLIST_KEY_NSCameraUsageDescription = "Gemini may need camera access for video calls or image capture.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "This app may need camera access for video calls or image capture.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Gemini may need microphone access for voice input.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "This app may need microphone access for voice input.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 0.1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.alexcding.geminidesktop;
-				PRODUCT_NAME = "Gemini Desktop";
+				PRODUCT_BUNDLE_IDENTIFIER = com.swiftbrowser.browser;
+				PRODUCT_NAME = "Swift Browser";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "Gemini Desktop Release";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "Swift Browser Release";
 				REGISTER_APP_GROUPS = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -457,7 +450,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		74CBD8A52EED8FCA00F226E3 /* Build configuration list for PBXProject "GeminiDesktop" */ = {
+		74CBD8A52EED8FCA00F226E3 /* Build configuration list for PBXProject "SwiftBrowser" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				74CBD8B32EED8FCB00F226E3 /* Debug */,
@@ -466,7 +459,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		74CBD8B52EED8FCB00F226E3 /* Build configuration list for PBXNativeTarget "GeminiDesktop" */ = {
+		74CBD8B52EED8FCB00F226E3 /* Build configuration list for PBXNativeTarget "SwiftBrowser" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				74CBD8B62EED8FCB00F226E3 /* Debug */,
