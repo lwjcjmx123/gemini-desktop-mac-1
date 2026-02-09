@@ -34,6 +34,8 @@ class WebViewModel {
     private(set) var currentURL: String = ""
     private(set) var pageTitle: String = "New Tab"
     private(set) var isLoading: Bool = false
+    private(set) var faviconImage: NSImage?
+    private(set) var faviconURL: URL?
 
     // MARK: - Private Properties
 
@@ -123,7 +125,7 @@ class WebViewModel {
 
         forwardObserver = wkWebView.observe(\.canGoForward, options: [.new, .initial]) { [weak self] webView, _ in
             DispatchQueue.main.async {
-                self?.canGoForward = webView.canGoForward
+                self?.canGoForward = webView.canGoBack
             }
         }
 
@@ -143,11 +145,85 @@ class WebViewModel {
         loadingObserver = wkWebView.observe(\.isLoading, options: [.new, .initial]) { [weak self] webView, _ in
             DispatchQueue.main.async {
                 self?.isLoading = webView.isLoading
-                // Record history when page finishes loading
+                // Record history and fetch favicon when page finishes loading
                 if !webView.isLoading, let url = webView.url?.absoluteString, !url.isEmpty {
                     let title = webView.title ?? ""
                     HistoryManager.shared.addItem(url: url, title: title)
+                    self?.fetchFavicon()
                 }
+            }
+        }
+    }
+
+    // MARK: - Favicon
+
+    private func fetchFavicon() {
+        // Use JavaScript to extract favicon URL from the page's <link> tags
+        let js = """
+        (function() {
+            var icons = document.querySelectorAll('link[rel~="icon"], link[rel="shortcut icon"], link[rel="apple-touch-icon"], link[rel="apple-touch-icon-precomposed"]');
+            var best = null;
+            var bestSize = 0;
+            for (var i = 0; i < icons.length; i++) {
+                var href = icons[i].href;
+                if (!href) continue;
+                var sizes = icons[i].getAttribute('sizes');
+                var size = 0;
+                if (sizes) {
+                    var parts = sizes.split('x');
+                    size = parseInt(parts[0]) || 0;
+                }
+                if (size > bestSize || !best) {
+                    best = href;
+                    bestSize = size;
+                }
+            }
+            if (!best) {
+                best = location.origin + '/favicon.ico';
+            }
+            return best;
+        })();
+        """
+
+        wkWebView.evaluateJavaScript(js) { [weak self] result, error in
+            guard let urlString = result as? String, !urlString.isEmpty else {
+                return
+            }
+            // Handle relative paths
+            var finalURLString = urlString
+            if urlString.hasPrefix("//") {
+                finalURLString = "https:" + urlString
+            } else if urlString.hasPrefix("/cdn/") || urlString.hasPrefix("/favicon") {
+                if let currentHost = self?.wkWebView.url?.host, let scheme = self?.wkWebView.url?.scheme {
+                    finalURLString = scheme + "://" + currentHost + urlString
+                }
+            }
+
+            if let url = URL(string: finalURLString) {
+                self?.faviconURL = url
+                self?.downloadFavicon(from: url)
+            }
+        }
+    }
+
+    private func downloadFavicon(from url: URL) {
+        Task.detached(priority: .background) {
+            do {
+                var request = URLRequest(url: url)
+                request.httpMethod = "GET"
+                request.setValue("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36", forHTTPHeaderField: "User-Agent")
+
+                let (data, response) = try await URLSession.shared.data(for: request)
+                guard let httpResponse = response as? HTTPURLResponse,
+                      (200...299).contains(httpResponse.statusCode),
+                      let image = NSImage(data: data) else {
+                    return
+                }
+                await MainActor.run { [weak self] in
+                    self?.faviconImage = image
+                }
+            } catch {
+                // Silently fail
             }
         }
     }
