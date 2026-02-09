@@ -18,7 +18,7 @@
                BlueprintIdentifier = "74CBD8A92EED8FCB00F226E3"
                BuildableName = "Swift Browser.app"
                BlueprintName = "SwiftBrowser"
-               ReferencedContainer = "container:GeminiDesktop.xcodeproj">
+               ReferencedContainer = "container:SwiftBrowser.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -47,7 +47,7 @@
             BlueprintIdentifier = "74CBD8A92EED8FCB00F226E3"
             BuildableName = "Swift Browser.app"
             BlueprintName = "SwiftBrowser"
-            ReferencedContainer = "container:GeminiDesktop.xcodeproj">
+            ReferencedContainer = "container:SwiftBrowser.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <EnvironmentVariables>
@@ -71,7 +71,7 @@
             BlueprintIdentifier = "74CBD8A92EED8FCB00F226E3"
             BuildableName = "Swift Browser.app"
             BlueprintName = "SwiftBrowser"
-            ReferencedContainer = "container:GeminiDesktop.xcodeproj">
+            ReferencedContainer = "container:SwiftBrowser.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

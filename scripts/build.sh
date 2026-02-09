@@ -9,7 +9,7 @@
 set -e
 
 PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-PROJECT="$PROJECT_DIR/GeminiDesktop.xcodeproj"
+PROJECT="$PROJECT_DIR/SwiftBrowser.xcodeproj"
 SCHEME="SwiftBrowser"
 APP_NAME="Swift Browser"
 CONFIGURATION="Debug"
