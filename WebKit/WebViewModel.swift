@@ -143,6 +143,11 @@ class WebViewModel {
         loadingObserver = wkWebView.observe(\.isLoading, options: [.new, .initial]) { [weak self] webView, _ in
             DispatchQueue.main.async {
                 self?.isLoading = webView.isLoading
+                // Record history when page finishes loading
+                if !webView.isLoading, let url = webView.url?.absoluteString, !url.isEmpty {
+                    let title = webView.title ?? ""
+                    HistoryManager.shared.addItem(url: url, title: title)
+                }
             }
         }
     }

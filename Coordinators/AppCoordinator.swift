@@ -71,6 +71,13 @@ class AppCoordinator {
         tabManager.closeTab(id)
     }
 
+    // MARK: - History
+
+    func showHistory() {
+        // Open Settings window and switch to History tab
+        NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+    }
+
     // MARK: - Window Management
 
     func openMainWindow(on targetScreen: NSScreen? = nil) {

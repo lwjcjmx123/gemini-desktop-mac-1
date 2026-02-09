@@ -93,6 +93,15 @@ struct SwiftBrowserApp: App {
                     Label("Close Tab", systemImage: "xmark.square")
                 }
                 .keyboardShortcut("w", modifiers: .command)
+
+                Divider()
+
+                Button {
+                    coordinator.showHistory()
+                } label: {
+                    Label("Show History", systemImage: "clock")
+                }
+                .keyboardShortcut("y", modifiers: .command)
             }
         }
 

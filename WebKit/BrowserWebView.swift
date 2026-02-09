@@ -22,13 +22,64 @@ struct BrowserWebView: NSViewRepresentable {
 
     class Coordinator: NSObject, WKNavigationDelegate, WKUIDelegate, WKDownloadDelegate {
         private var downloadDestination: URL?
+        private var popupWebView: WKWebView?
 
         func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
-            // Load target="_blank" links in the current tab
-            if let url = navigationAction.request.url {
+            let url = navigationAction.request.url
+
+            // OAuth/auth popups need a real WKWebView to complete the flow
+            if let url = url, Self.isAuthURL(url) {
+                let popup = WKWebView(frame: webView.bounds, configuration: configuration)
+                popup.navigationDelegate = self
+                popup.uiDelegate = self
+                popup.customUserAgent = webView.customUserAgent
+                popupWebView = popup
+
+                // Show popup in a new window
+                DispatchQueue.main.async {
+                    let window = NSWindow(
+                        contentRect: NSRect(x: 0, y: 0, width: 500, height: 650),
+                        styleMask: [.titled, .closable, .resizable],
+                        backing: .buffered,
+                        defer: false
+                    )
+                    window.title = "Sign In"
+                    window.contentView = popup
+                    window.center()
+                    window.makeKeyAndOrderFront(nil)
+                }
+                return popup
+            }
+
+            // Regular target="_blank" links: load in current tab
+            if let url = url {
                 webView.load(URLRequest(url: url))
             }
             return nil
+        }
+
+        func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+            // Close the popup window after OAuth completes and redirects back
+            if webView === popupWebView,
+               let url = webView.url,
+               !Self.isAuthURL(url) {
+                webView.window?.close()
+                popupWebView = nil
+            }
+        }
+
+        private static func isAuthURL(_ url: URL) -> Bool {
+            let host = url.host?.lowercased() ?? ""
+            let authDomains = [
+                "accounts.google.com",
+                "appleid.apple.com",
+                "login.microsoftonline.com",
+                "github.com/login",
+                "auth0.com"
+            ]
+            return authDomains.contains(where: { host.contains($0.components(separatedBy: "/").first ?? $0) })
+                && (host.contains("accounts.") || host.contains("login.") || host.contains("appleid.")
+                    || url.path.contains("/oauth") || url.path.contains("/signin") || url.path.contains("/auth") || url.path.contains("/login"))
         }
 
         func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse, decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {

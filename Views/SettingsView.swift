@@ -5,6 +5,41 @@ import KeyboardShortcuts
 
 struct SettingsView: View {
     @Binding var coordinator: AppCoordinator
+
+    var body: some View {
+        TabView {
+            GeneralSettingsTab(coordinator: $coordinator)
+                .tabItem {
+                    Label("General", systemImage: "gear")
+                }
+
+            PrivacySettingsTab()
+                .tabItem {
+                    Label("Privacy", systemImage: "hand.raised")
+                }
+
+            SiteDataView()
+                .tabItem {
+                    Label("Site Data", systemImage: "externaldrive")
+                }
+
+            HistoryView(onNavigate: { url in
+                coordinator.tabManager.selectedTab?.webViewModel.loadURL(url)
+                // Close settings window
+                NSApp.windows.first { $0.title == "Settings" || $0.identifier?.rawValue.contains("settings") == true }?.close()
+            })
+            .tabItem {
+                Label("History", systemImage: "clock")
+            }
+        }
+        .frame(minWidth: 600, minHeight: 500)
+    }
+}
+
+// MARK: - General Settings Tab
+
+struct GeneralSettingsTab: View {
+    @Binding var coordinator: AppCoordinator
     @AppStorage(UserDefaultsKeys.pageZoom.rawValue) private var pageZoom: Double = Constants.defaultPageZoom
     @AppStorage(UserDefaultsKeys.hideWindowAtLaunch.rawValue) private var hideWindowAtLaunch: Bool = false
     @AppStorage(UserDefaultsKeys.hideDockIcon.rawValue) private var hideDockIcon: Bool = false
@@ -16,8 +51,6 @@ struct SettingsView: View {
     @AppStorage(UserDefaultsKeys.proxyPort.rawValue) private var proxyPort: Int = 7890
     @State private var showProxyRestartHint = false
 
-    @State private var showingResetAlert = false
-    @State private var isClearing = false
     @State private var launchAtLogin = SMAppService.mainApp.status == .enabled
 
     var body: some View {
@@ -86,23 +119,57 @@ struct SettingsView: View {
                         .foregroundStyle(.orange)
                 }
             }
+        }
+        .formStyle(.grouped)
+    }
 
-            Section("Privacy") {
+    struct Constants {
+        static let defaultPageZoom: Double = 1.0
+        static let minPageZoom: Double = 0.6
+        static let maxPageZoom: Double = 1.4
+        static let pageZoomStep: Double = 0.01
+    }
+}
+
+// MARK: - Privacy Settings Tab
+
+struct PrivacySettingsTab: View {
+    @State private var showingResetAlert = false
+    @State private var isClearing = false
+
+    var body: some View {
+        Form {
+            Section("Website Data") {
                 HStack {
                     VStack(alignment: .leading) {
-                        Text("Reset Website Data")
-                        Text("Clears cookies, cache, and login sessions")
+                        Text("Reset All Website Data")
+                        Text("Clears cookies, cache, and login sessions for all sites")
                             .font(.caption).foregroundStyle(.secondary)
                     }
                     Spacer()
-                    Button("Reset", role: .destructive) { showingResetAlert = true }
+                    Button("Reset All", role: .destructive) { showingResetAlert = true }
                         .disabled(isClearing)
                         .overlay { if isClearing { ProgressView().scaleEffect(0.7) } }
                 }
             }
+
+            Section("Browsing History") {
+                HStack {
+                    VStack(alignment: .leading) {
+                        Text("Clear Browsing History")
+                        Text("Removes all recorded page visits")
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Button("Clear History", role: .destructive) {
+                        HistoryManager.shared.clearAll()
+                    }
+                    .disabled(HistoryManager.shared.items.isEmpty)
+                }
+            }
         }
         .formStyle(.grouped)
-        .alert("Reset Website Data?", isPresented: $showingResetAlert) {
+        .alert("Reset All Website Data?", isPresented: $showingResetAlert) {
             Button("Cancel", role: .cancel) { }
             Button("Reset", role: .destructive) { clearWebsiteData() }
         } message: {
