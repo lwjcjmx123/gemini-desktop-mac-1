@@ -11,29 +11,50 @@ struct MainWindowView: View {
     @Environment(\.openWindow) private var openWindow
     @State private var addressText: String = ""
     @State private var shouldFocusAddressBar: Bool = false
+    @State private var isSidebarCollapsed: Bool = false
 
     private var selectedTab: BrowserTab? {
         coordinator.tabManager.selectedTab
     }
 
+    private var sidebarWidth: CGFloat {
+        isSidebarCollapsed ? 48 : 240
+    }
+
     var body: some View {
-        NavigationSplitView {
-            SidebarView(tabManager: coordinator.tabManager)
-                .navigationSplitViewColumnWidth(min: 180, ideal: 220, max: 320)
-        } detail: {
-            if let tab = selectedTab {
-                BrowserWebView(webView: tab.webViewModel.wkWebView)
-                    .id(tab.id)
-                    .onChange(of: tab.url) { _, newURL in
-                        addressText = newURL
-                    }
-                    .onAppear {
-                        addressText = tab.url
-                    }
-            } else {
-                emptyState
+        HStack(spacing: 0) {
+            // Sidebar
+            SidebarView(
+                tabManager: coordinator.tabManager,
+                isCollapsed: $isSidebarCollapsed,
+                onNewTab: { coordinator.newTab() }
+            )
+            .frame(width: sidebarWidth)
+            .clipped()
+
+            // Divider between sidebar and content
+            Rectangle()
+                .fill(Color(nsColor: .separatorColor))
+                .frame(width: 1)
+
+            // Content area
+            VStack(spacing: 0) {
+                if let tab = selectedTab {
+                    BrowserWebView(webView: tab.webViewModel.wkWebView)
+                        .id(tab.id)
+                        .onChange(of: tab.url) { _, newURL in
+                            addressText = newURL
+                        }
+                        .onAppear {
+                            addressText = tab.url
+                        }
+                } else {
+                    emptyState
+                }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+        .animation(.easeInOut(duration: 0.2), value: isSidebarCollapsed)
         .onChange(of: coordinator.tabManager.selectedTabID) { _, _ in
             if let tab = selectedTab {
                 addressText = tab.url
@@ -81,15 +102,6 @@ struct MainWindowView: View {
                         coordinator.reload()
                     }
                 )
-            }
-
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                    coordinator.newTab()
-                } label: {
-                    Image(systemName: "plus")
-                }
-                .help("New Tab")
             }
         }
     }

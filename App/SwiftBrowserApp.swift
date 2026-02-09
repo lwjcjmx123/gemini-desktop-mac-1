@@ -22,6 +22,38 @@ struct SwiftBrowserApp: App {
         .defaultSize(width: Constants.mainWindowDefaultWidth, height: Constants.mainWindowDefaultHeight)
         .windowToolbarStyle(.unified(showsTitle: false))
         .commands {
+            // History menu
+            CommandMenu("History") {
+                Button {
+                    coordinator.showHistory()
+                } label: {
+                    Label("Show All History", systemImage: "clock")
+                }
+                .keyboardShortcut("y", modifiers: .command)
+
+                Button {
+                    HistoryManager.shared.clearAll()
+                } label: {
+                    Label("Clear History", systemImage: "trash")
+                }
+
+                Divider()
+
+                // Recent history items
+                ForEach(Array(HistoryManager.shared.items.prefix(15))) { item in
+                    Button {
+                        coordinator.tabManager.selectedTab?.webViewModel.loadURL(item.url)
+                    } label: {
+                        Text(item.title.isEmpty ? item.url : item.title)
+                    }
+                }
+
+                if HistoryManager.shared.items.isEmpty {
+                    Text("No History")
+                        .foregroundStyle(.secondary)
+                }
+            }
+
             CommandGroup(after: .toolbar) {
                 Button {
                     coordinator.goBack()
@@ -93,15 +125,6 @@ struct SwiftBrowserApp: App {
                     Label("Close Tab", systemImage: "xmark.square")
                 }
                 .keyboardShortcut("w", modifiers: .command)
-
-                Divider()
-
-                Button {
-                    coordinator.showHistory()
-                } label: {
-                    Label("Show History", systemImage: "clock")
-                }
-                .keyboardShortcut("y", modifiers: .command)
             }
         }
 
