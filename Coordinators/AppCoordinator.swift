@@ -45,6 +45,9 @@ class AppCoordinator {
 
         // Setup keyboard shortcut
         setupKeyboardShortcut()
+
+        // Apply proxy settings immediately on launch
+        ProxyHelper.applyCurrentSettings()
     }
 
     // MARK: - Navigation (delegates to selected tab)

@@ -49,7 +49,6 @@ struct GeneralSettingsTab: View {
     @AppStorage(UserDefaultsKeys.proxyEnabled.rawValue) private var proxyEnabled: Bool = false
     @AppStorage(UserDefaultsKeys.proxyHost.rawValue) private var proxyHost: String = "127.0.0.1"
     @AppStorage(UserDefaultsKeys.proxyPort.rawValue) private var proxyPort: Int = 7890
-    @State private var showProxyRestartHint = false
 
     @State private var launchAtLogin = SMAppService.mainApp.status == .enabled
 
@@ -95,28 +94,22 @@ struct GeneralSettingsTab: View {
 
             Section("Network") {
                 Toggle("Enable SOCKS5 Proxy", isOn: $proxyEnabled)
-                    .onChange(of: proxyEnabled) { _, _ in showProxyRestartHint = true }
+                    .onChange(of: proxyEnabled) { _, _ in ProxyHelper.applyCurrentSettings() }
 
                 if proxyEnabled {
                     HStack {
                         Text("Host:")
                         TextField("127.0.0.1", text: $proxyHost)
                             .textFieldStyle(.roundedBorder)
-                            .onChange(of: proxyHost) { _, _ in showProxyRestartHint = true }
+                            .onChange(of: proxyHost) { _, _ in ProxyHelper.applyCurrentSettings() }
                     }
                     HStack {
                         Text("Port:")
                         TextField("1080", value: $proxyPort, format: .number)
                             .textFieldStyle(.roundedBorder)
                             .frame(width: 80)
-                            .onChange(of: proxyPort) { _, _ in showProxyRestartHint = true }
+                            .onChange(of: proxyPort) { _, _ in ProxyHelper.applyCurrentSettings() }
                     }
-                }
-
-                if showProxyRestartHint {
-                    Text("Proxy settings saved. Restart the app to apply changes.")
-                        .font(.caption)
-                        .foregroundStyle(.orange)
                 }
             }
         }
